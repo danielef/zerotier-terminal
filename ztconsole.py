@@ -37,6 +37,7 @@ def main(stdscr):
     curses.init_pair(4, curses.COLOR_RED,    curses.COLOR_BLACK)
 
     networks = {}
+    ts_success = ''
     while True:
         # Clear screen
         stdscr.clear()
@@ -46,21 +47,26 @@ def main(stdscr):
             try:
                 for network in retrieve_networks(zerotier_token):
                     network_id = network.get('id')
-                    networks[network_id] = sorted(retrieve_members(network_id, zerotier_token), key=lambda m: m['name']) 
-            except Exception as e:
+                    network_name = network.get('config', {}).get('name')
+                    networks[network_id] = (network_name,
+                                            sorted(retrieve_members(network_id, zerotier_token), key=lambda m: m['name']))
+                ts_success = dt
+            except Exception as e:                
                 stdscr.addstr(0, 0, '•',  curses.color_pair(3))
-                stdscr.addstr(0, 2, '{} Connection error!'.format(dt),  curses.color_pair(1))
+                stdscr.addstr(0, 2, '{} Connection Lost!'.format(ts_success),  curses.color_pair(1))
                 #stdscr.refresh()
         time.sleep(1)
 
-        i = 0
-        for x,members in networks.items():
+        i = 1
+        for x,(name,members) in networks.items():
+            stdscr.addstr(i, 0, '•',  curses.color_pair(2))
+            stdscr.addstr(i, 2, '{}'.format(name), curses.color_pair(1))
             for y, member in enumerate(members):
                 color_status = curses.color_pair(2) if member.get('online', False) else curses.color_pair(4)
                 member_name = member.get('name', '')
                 member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip']})
-                stdscr.addstr(i+1, 0, '•', color_status)
-                stdscr.addstr(i+1, 2, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
+                stdscr.addstr(i+1, 1, '•', color_status)
+                stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
                 i=i+1
         stdscr.refresh()
 

@@ -30,7 +30,14 @@ def retrieve_members(network_id,
     request = urllib.request.Request(template_url.format(network_id))
     return retrieve_data(request, token, template_auth)
 
-def main(stdscr):
+def main():
+    curses.initscr()
+    curses.start_color()
+#    curses.use_default_colors()
+
+    stdscr = curses.newpad(40,60)
+    mypad_pos = 0
+
     curses.init_pair(1, curses.COLOR_WHITE,  curses.COLOR_BLACK)
     curses.init_pair(2, curses.COLOR_GREEN,  curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
@@ -39,7 +46,8 @@ def main(stdscr):
     networks = {}
     ts_success = ''
     while True:
-        # Clear screen
+        size=os.get_terminal_size()
+        stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
         stdscr.clear()
         ts = time.localtime()
         dt = time.strftime("%H:%M:%S", ts)
@@ -54,13 +62,13 @@ def main(stdscr):
             except Exception as e:                
                 stdscr.addstr(0, 0, '•',  curses.color_pair(3))
                 stdscr.addstr(0, 2, '{} Connection Lost!'.format(ts_success),  curses.color_pair(1))
-                #stdscr.refresh()
-        time.sleep(1)
 
+        time.sleep(1)
         i = 1
+
         for x,(name,members) in networks.items():
             stdscr.addstr(i, 0, '•',  curses.color_pair(2))
-            stdscr.addstr(i, 2, '{}'.format(name), curses.color_pair(1))
+            stdscr.addstr(i, 2, '{} : {}'.format(name, len(members)), curses.color_pair(1))
             for y, member in enumerate(members):
                 color_status = curses.color_pair(2) if member.get('online', False) else curses.color_pair(4)
                 member_name = member.get('name', '')
@@ -68,9 +76,14 @@ def main(stdscr):
                 stdscr.addstr(i+1, 1, '•', color_status)
                 stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
                 i=i+1
-        stdscr.refresh()
+        stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+        #stdscr.refresh(0, 0, , 1, 1, 1)
+        #stdscr.refresh()
 
-        #stdscr.getkey()
+        if stdscr.getch() == ord('q'):
+            curses.endwin()
+            break
 
-curses.wrapper(main)
+main()
+#curses.wrapper(main)
 

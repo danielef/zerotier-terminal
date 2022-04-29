@@ -43,46 +43,57 @@ def main():
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED,    curses.COLOR_BLACK)
 
-    networks = {}
-    ts_success = ''
-    while True:
-        size=os.get_terminal_size()
+    try:
+        networks = {}
+        ts_success = ''
+        while True:
+            size=os.get_terminal_size()
+            stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+            stdscr.clear()
+            ts = time.localtime()
+            dt = time.strftime("%H:%M:%S", ts)
+            if ts.tm_sec % 10:
+                try:
+                    for network in retrieve_networks(zerotier_token):
+                        network_id = network.get('id')
+                        network_name = network.get('config', {}).get('name')
+                        networks[network_id] = (network_name,
+                                                sorted(retrieve_members(network_id, zerotier_token), key=lambda m: m['name']))
+                    ts_success = dt
+                except Exception as e:                
+                    stdscr.addstr(0, 0, '•',  curses.color_pair(3))
+                    stdscr.addstr(0, 2, '{} Connection Lost!'.format(ts_success),  curses.color_pair(1))
+
+            time.sleep(1)
+            i = 1
+
+            for x,(name,members) in networks.items():
+                stdscr.addstr(i, 0, '•',  curses.color_pair(2))
+                stdscr.addstr(i, 2, '{} : {}'.format(name, len(members)), curses.color_pair(1))
+                for y, member in enumerate(members):
+                    color_status = curses.color_pair(2) if member.get('online', False) else curses.color_pair(4)
+                    member_name = member.get('name', '')
+                    member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip']})
+                    stdscr.addstr(i+1, 1, '•', color_status)
+                    stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
+                    i=i+1
+            stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+            #stdscr.refresh(0, 0, , 1, 1, 1)
+            #stdscr.refresh()
+
+            if stdscr.getch() == ord('q'):
+                curses.endwin()
+                break
+
+    except KeyboardInterrupt:
+        stdscr.addstr(0, 0, "Ctrl+C detected, Program Stopping")
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
-        stdscr.clear()
-        ts = time.localtime()
-        dt = time.strftime("%H:%M:%S", ts)
-        if ts.tm_sec % 10:
-            try:
-                for network in retrieve_networks(zerotier_token):
-                    network_id = network.get('id')
-                    network_name = network.get('config', {}).get('name')
-                    networks[network_id] = (network_name,
-                                            sorted(retrieve_members(network_id, zerotier_token), key=lambda m: m['name']))
-                ts_success = dt
-            except Exception as e:                
-                stdscr.addstr(0, 0, '•',  curses.color_pair(3))
-                stdscr.addstr(0, 2, '{} Connection Lost!'.format(ts_success),  curses.color_pair(1))
-
-        time.sleep(1)
-        i = 1
-
-        for x,(name,members) in networks.items():
-            stdscr.addstr(i, 0, '•',  curses.color_pair(2))
-            stdscr.addstr(i, 2, '{} : {}'.format(name, len(members)), curses.color_pair(1))
-            for y, member in enumerate(members):
-                color_status = curses.color_pair(2) if member.get('online', False) else curses.color_pair(4)
-                member_name = member.get('name', '')
-                member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip']})
-                stdscr.addstr(i+1, 1, '•', color_status)
-                stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
-                i=i+1
+    
+    finally:
+        stdscr.addstr(0, 0, "Program cleanup")
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
-        #stdscr.refresh(0, 0, , 1, 1, 1)
-        #stdscr.refresh()
-
-        if stdscr.getch() == ord('q'):
-            curses.endwin()
-            break
+        time.sleep(3) # This delay just so we can see final screen output
+        curses.endwin()
 
 main()
 #curses.wrapper(main)

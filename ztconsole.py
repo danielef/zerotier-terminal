@@ -82,17 +82,15 @@ def main():
             #stdscr.refresh()
 
             if stdscr.getch() == ord('q'):
-                curses.endwin()
                 break
 
     except KeyboardInterrupt:
-        stdscr.addstr(0, 0, "Ctrl+C detected, Program Stopping")
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
     
     finally:
-        stdscr.addstr(0, 0, "Program cleanup")
+        stdscr.addstr(0, 0, "Quitting ...")
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
-        time.sleep(3) # This delay just so we can see final screen output
+        time.sleep(1) # This delay just so we can see final screen output
         curses.endwin()
 
 main()

@@ -37,8 +37,8 @@ def main():
     curses.start_color()
     curses.use_default_colors()
 
-    size = os.get_terminal_size()
-    stdscr = curses.newpad(200,60)
+    h,w = window.getmaxyx()
+    stdscr = curses.newpad(h,w)
     key_pressed = ''
     mypad_pos = 0
     
@@ -51,8 +51,8 @@ def main():
         networks = {}
         ts_success = ''
         while True:
-            size=os.get_terminal_size()
-            stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
+            h,w = window.getmaxyx()
+            stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
             stdscr.clear()
             ts = time.localtime()
             dt = time.strftime('%H:%M:%S', ts)
@@ -81,7 +81,7 @@ def main():
                     stdscr.addstr(i+1, 1, '•', color_status)
                     stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
                     i=i+1
-            stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
+            stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
 
             key_pressed = stdscr.getch()
             if key_pressed == (27 and 91 and 65):
@@ -89,18 +89,17 @@ def main():
             elif key_pressed == (27 and 91 and 66):
                 mypad_pos += 1
             elif key_pressed == (27 and 91 and 53):
-                mypad_pos -= size.lines - 2
+                mypad_pos -= h - 2
             elif key_pressed == (27 and 91 and 54):
-                mypad_pos += size.lines - 2
-            #    break
+                mypad_pos += h - 2
 
     except KeyboardInterrupt:
-        stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
+        stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
     
     finally:
         stdscr.addstr(0, 0, '•',  curses.color_pair(3))
         stdscr.addstr(0, 2, 'quitting ...',  curses.color_pair(1))
-        stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
+        stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
         time.sleep(1) # This delay just so we can see final screen output
         curses.endwin()
 

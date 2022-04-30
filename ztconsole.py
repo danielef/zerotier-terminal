@@ -88,7 +88,10 @@ def main():
                 mypad_pos -= 1
             elif key_pressed == (27 and 91 and 66):
                 mypad_pos += 1
-
+            elif key_pressed == (27 and 91 and 53):
+                mypad_pos -= size.lines - 2
+            elif key_pressed == (27 and 91 and 54):
+                mypad_pos += size.lines - 2
             #    break
 
     except KeyboardInterrupt:

@@ -51,7 +51,7 @@ def main():
             stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
             stdscr.clear()
             ts = time.localtime()
-            dt = time.strftime("%H:%M:%S", ts)
+            dt = time.strftime('%H:%M:%S', ts)
             if ts.tm_sec % 10:
                 try:
                     for network in retrieve_networks(zerotier_token):
@@ -78,8 +78,6 @@ def main():
                     stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
                     i=i+1
             stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
-            #stdscr.refresh(0, 0, , 1, 1, 1)
-            #stdscr.refresh()
 
             if stdscr.getch() == ord('q'):
                 break
@@ -88,7 +86,8 @@ def main():
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
     
     finally:
-        stdscr.addstr(0, 0, "Quitting ...")
+        stdscr.addstr(0, 0, '•',  curses.color_pair(3))
+        stdscr.addstr(0, 2, ' Quitting ...',  curses.color_pair(1))
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
         time.sleep(1) # This delay just so we can see final screen output
         curses.endwin()

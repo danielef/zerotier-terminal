@@ -31,11 +31,15 @@ def retrieve_members(network_id,
     return retrieve_data(request, token, template_auth)
 
 def main():
-    curses.initscr()
+    window = curses.initscr()
+    curses.noecho() # prevents user input from being echoed
+
     curses.start_color()
     curses.use_default_colors()
 
-    stdscr = curses.newpad(40,60)
+    size = os.get_terminal_size()
+    stdscr = curses.newpad(200,60)
+    key_pressed = ''
     mypad_pos = 0
     
     curses.init_pair(1, curses.COLOR_WHITE,  curses.COLOR_BLACK)
@@ -48,11 +52,11 @@ def main():
         ts_success = ''
         while True:
             size=os.get_terminal_size()
-            stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+            stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
             stdscr.clear()
             ts = time.localtime()
             dt = time.strftime('%H:%M:%S', ts)
-            if ts.tm_sec % 10:
+            if ts.tm_sec % 30:
                 try:
                     for network in retrieve_networks(zerotier_token):
                         network_id = network.get('id')
@@ -64,7 +68,7 @@ def main():
                     stdscr.addstr(0, 0, '•',  curses.color_pair(3))
                     stdscr.addstr(0, 2, '{} connection lost!'.format(ts_success),  curses.color_pair(1))
 
-            time.sleep(1)
+            #time.sleep(1)
             i = 1
 
             for x,(name,members) in networks.items():
@@ -77,18 +81,23 @@ def main():
                     stdscr.addstr(i+1, 1, '•', color_status)
                     stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
                     i=i+1
-            stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+            stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
 
-            if stdscr.getch() == ord('q'):
-                break
+            key_pressed = stdscr.getch()
+            if key_pressed == (27 and 91 and 65):
+                mypad_pos -= 1
+            elif key_pressed == (27 and 91 and 66):
+                mypad_pos += 1
+
+            #    break
 
     except KeyboardInterrupt:
-        stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+        stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
     
     finally:
         stdscr.addstr(0, 0, '•',  curses.color_pair(3))
         stdscr.addstr(0, 2, 'quitting ...',  curses.color_pair(1))
-        stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
+        stdscr.refresh(mypad_pos, 0, 0, 1, size.lines-1, size.columns-1)
         time.sleep(1) # This delay just so we can see final screen output
         curses.endwin()
 

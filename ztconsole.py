@@ -62,7 +62,7 @@ def main():
                     ts_success = dt
                 except Exception as e:                
                     stdscr.addstr(0, 0, '•',  curses.color_pair(3))
-                    stdscr.addstr(0, 2, '{} Connection Lost!'.format(ts_success),  curses.color_pair(1))
+                    stdscr.addstr(0, 2, '{} connection lost!'.format(ts_success),  curses.color_pair(1))
 
             time.sleep(1)
             i = 1
@@ -87,7 +87,7 @@ def main():
     
     finally:
         stdscr.addstr(0, 0, '•',  curses.color_pair(3))
-        stdscr.addstr(0, 2, ' Quitting ...',  curses.color_pair(1))
+        stdscr.addstr(0, 2, 'quitting ...',  curses.color_pair(1))
         stdscr.refresh(0, 0, 0, 1, size.lines-1, size.columns-1)
         time.sleep(1) # This delay just so we can see final screen output
         curses.endwin()

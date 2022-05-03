@@ -36,11 +36,11 @@ def get_member_status(member):
     member_ip =  member_cfg.get('ipAssignments')[0] if len(member_cfg.get('ipAssignments')) > 0 else member.get('physicalAddress','unknown')
 
     if member_cfg.get('authorized') is not True:
-        return (curses.color_pair(5), 'unauthorized', member_ip)
+        return {'member_color': curses.color_pair(5), 'member_name': 'unauthorized', 'member_ip': member_ip}
     elif member.get('online', False):
-        return (curses.color_pair(2), member_name, member_ip)
+        return {'member_color': curses.color_pair(2), 'member_name': member_name, 'member_ip': member_ip}
     else:
-        return (curses.color_pair(4), member_name, member_ip)
+        return {'member_color': curses.color_pair(4), 'member_name': member_name, 'member_ip': member_ip}
 
 def main():
     window = curses.initscr()
@@ -88,9 +88,9 @@ def main():
                 stdscr.addstr(i, 0, '•',  curses.color_pair(2))
                 stdscr.addstr(i, 2, '{} : {}'.format(name, len(members)), curses.color_pair(1))
                 for y, member in enumerate(members):
-                    member_color, member_name, member_ip = get_member_status(member)
-                    stdscr.addstr(i+1, 1, '•', member_color)
-                    stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_ip), curses.color_pair(1))
+                    member_status = get_member_status(member)
+                    stdscr.addstr(i+1, 1, '•',  member_status.get('member_color'))
+                    stdscr.addstr(i+1, 3, '{} {}'.format(member_status.get('member_name'), member_status.get('member_ip'), curses.color_pair(1)))
                     i=i+1
             stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
 

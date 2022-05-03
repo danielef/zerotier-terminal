@@ -33,7 +33,7 @@ def retrieve_members(network_id,
 def get_member_status(member):
     member_name = member.get('name', '')
     member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip'], 'authorized': False})
-    member_ip =  member_cfg.get('ipAssignments')[0] if len(member_cfg.get('ipAssignments')) > 1 else member.get('physicalAddress','unknown')
+    member_ip =  member_cfg.get('ipAssignments')[0] if len(member_cfg.get('ipAssignments')) > 0 else member.get('physicalAddress','unknown')
 
     if member_cfg.get('authorized') is not True:
         return (curses.color_pair(5), 'unauthorized', member_ip)

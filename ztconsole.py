@@ -30,6 +30,18 @@ def retrieve_members(network_id,
     request = urllib.request.Request(template_url.format(network_id))
     return retrieve_data(request, token, template_auth)
 
+def get_member_status(member):
+    member_name = member.get('name', '')
+    member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip'], 'authorized': False})
+    member_ip =  member_cfg.get('ipAssignments')[0] if len(member_cfg.get('ipAssignments')) > 1 else member.get('physicalAddress','unknown')
+
+    if member_cfg.get('authorized') is not True:
+        return (curses.color_pair(5), 'unauthorized', member_ip)
+    elif member.get('online', False):
+        return (curses.color_pair(2), member_name, member_ip)
+    else:
+        return (curses.color_pair(4), member_name, member_ip)
+
 def main():
     window = curses.initscr()
     curses.noecho() # prevents user input from being echoed
@@ -46,6 +58,7 @@ def main():
     curses.init_pair(2, curses.COLOR_GREEN,  curses.COLOR_BLACK)
     curses.init_pair(3, curses.COLOR_YELLOW, curses.COLOR_BLACK)
     curses.init_pair(4, curses.COLOR_RED,    curses.COLOR_BLACK)
+    curses.init_pair(5, curses.COLOR_BLUE,   curses.COLOR_BLACK)
 
     try:
         networks = {}
@@ -75,11 +88,9 @@ def main():
                 stdscr.addstr(i, 0, '•',  curses.color_pair(2))
                 stdscr.addstr(i, 2, '{} : {}'.format(name, len(members)), curses.color_pair(1))
                 for y, member in enumerate(members):
-                    color_status = curses.color_pair(2) if member.get('online', False) else curses.color_pair(4)
-                    member_name = member.get('name', '')
-                    member_cfg  = member.get('config', {'ipAssignments': ['no-valid-ip']})
-                    stdscr.addstr(i+1, 1, '•', color_status)
-                    stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_cfg.get('ipAssignments')[0]), curses.color_pair(1))
+                    member_color, member_name, member_ip = get_member_status(member)
+                    stdscr.addstr(i+1, 1, '•', member_color)
+                    stdscr.addstr(i+1, 3, '{} {}'.format(member_name, member_ip), curses.color_pair(1))
                     i=i+1
             stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
 

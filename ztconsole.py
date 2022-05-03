@@ -90,7 +90,9 @@ def main():
                 for y, member in enumerate(members):
                     member_status = get_member_status(member)
                     stdscr.addstr(i+1, 1, '•',  member_status.get('member_color'))
-                    stdscr.addstr(i+1, 3, '{} {}'.format(member_status.get('member_name'), member_status.get('member_ip'), curses.color_pair(1)))
+                    stdscr.addstr(i+1, 3, '{} {}'.format(member_status.get('member_name'), 
+                                                         member_status.get('member_ip'), 
+                                                         curses.color_pair(1)))
                     i=i+1
             stdscr.refresh(mypad_pos, 0, 0, 1, h-1, w-1)
 
